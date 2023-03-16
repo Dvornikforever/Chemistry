@@ -1,12 +1,15 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, make_response, jsonify
 from flask_login import LoginManager, login_user
-from data import db_session
+
+from blueprint import jobs_api
 from data.users import User
 from forms.form import LoginForm
+from data import db_session
+
 
 app = Flask(__name__)
 login_manager = LoginManager()
-login_manager.int_app(app)
+login_manager.init_app(app)
 
 
 def load_user(user_id):
@@ -27,3 +30,17 @@ def login():
                                message="Неправильный логин или пароль",
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+def main():
+    db_session.global_init("db/blogs.db")
+    app.register_blueprint(jobs_api.blueprint)
+    app.run(port='5001')
+
+
+main()
