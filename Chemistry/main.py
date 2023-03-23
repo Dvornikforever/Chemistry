@@ -1,10 +1,11 @@
 from flask import Flask, render_template, redirect, make_response, jsonify
 from flask_login import LoginManager, login_user
 
-from blueprint import jobs_api
 from data.users import User
 from forms.form import LoginForm
 from data import db_session
+import jobs_api
+import users_resource
 
 
 app = Flask(__name__)
@@ -40,6 +41,11 @@ def not_found(error):
 def main():
     db_session.global_init("db/blogs.db")
     app.register_blueprint(jobs_api.blueprint)
+    # для списка объектов
+    users_resource.api.add_resource(users_resource.UsersListResource, '/api/v2/users')
+
+    # для одного объекта
+    users_resource.api.add_resource(users_resource.UsersResource, '/api/v2/users/<int:user_id>')
     app.run(port='5001')
 
 
